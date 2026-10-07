@@ -48,7 +48,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         List<Person> personsWithIds = new ArrayList<>();
         for (Person person : persons) {
             Person personWithId = withId(person, newNextPersonId);
-            newNextPersonId = nextPersonIdAfter(personWithId, newNextPersonId);
+            newNextPersonId = nextPersonIdAfter(personWithId.getId().orElseThrow(), newNextPersonId);
             personsWithIds.add(personWithId);
         }
 
@@ -85,7 +85,7 @@ public class AddressBook implements ReadOnlyAddressBook {
         requireNonNull(p);
         Person personWithId = withId(p, nextPersonId);
         persons.add(personWithId);
-        nextPersonId = nextPersonIdAfter(personWithId, nextPersonId);
+        nextPersonId = nextPersonIdAfter(personWithId.getId().orElseThrow(), nextPersonId);
     }
 
     /**
@@ -122,11 +122,10 @@ public class AddressBook implements ReadOnlyAddressBook {
     }
 
     /**
-     * Returns the next available ID number, given that {@code person} now holds its ID.
+     * Returns the next available ID number, given that {@code assignedId} is now in use.
      */
-    private static int nextPersonIdAfter(Person person, int currentNextId) {
-        assert person.getId().isPresent();
-        return Math.max(currentNextId, person.getId().get().getValue() + 1);
+    private static int nextPersonIdAfter(PersonId assignedId, int currentNextId) {
+        return Math.max(currentNextId, assignedId.getValue() + 1);
     }
 
     //// util methods

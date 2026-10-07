@@ -143,6 +143,28 @@ public class AddressBookTest {
     }
 
     @Test
+    public void equals() {
+        AddressBook typicalAddressBook = getTypicalAddressBook();
+
+        // same values -> returns true
+        AddressBook typicalAddressBookCopy = getTypicalAddressBook();
+        assertTrue(typicalAddressBook.equals(typicalAddressBookCopy));
+        assertEquals(typicalAddressBook.hashCode(), typicalAddressBookCopy.hashCode());
+
+        // same object -> returns true
+        assertTrue(typicalAddressBook.equals(typicalAddressBook));
+
+        // null -> returns false
+        assertFalse(typicalAddressBook.equals(null));
+
+        // different type -> returns false
+        assertFalse(typicalAddressBook.equals(5));
+
+        // different persons -> returns false
+        assertFalse(typicalAddressBook.equals(addressBook));
+    }
+
+    @Test
     public void equals_differentNextPersonId_returnsFalse() {
         AddressBook otherAddressBook = new AddressBook();
         otherAddressBook.addPerson(HOON);
