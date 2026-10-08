@@ -53,7 +53,9 @@ public class EditCommand extends Command {
     public static final String MESSAGE_NOT_EDITED = "At least one field to edit must be provided.";
     public static final String MESSAGE_DUPLICATE_PERSON = "This person already exists in the address book.";
 
+    // exactly one of these is set, depending on how the person to edit was selected
     private final Index index;
+    private final PersonId targetId;
     private final EditPersonDescriptor editPersonDescriptor;
 
     /**
@@ -65,12 +67,31 @@ public class EditCommand extends Command {
         requireNonNull(editPersonDescriptor);
 
         this.index = index;
+        this.targetId = null;
+        this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
+    }
+
+    /**
+     * @param targetId of the person to edit
+     * @param editPersonDescriptor details to edit the person with
+     */
+    public EditCommand(PersonId targetId, EditPersonDescriptor editPersonDescriptor) {
+        requireNonNull(targetId);
+        requireNonNull(editPersonDescriptor);
+
+        this.index = null;
+        this.targetId = targetId;
         this.editPersonDescriptor = new EditPersonDescriptor(editPersonDescriptor);
     }
 
     @Override
     public CommandResult execute(Model model) throws CommandException {
         requireNonNull(model);
+        if (targetId != null) {
+            // selecting a person by ID is not connected to the address book yet
+            throw new CommandException(Messages.MESSAGE_ID_TARGETING_NOT_SUPPORTED);
+        }
+
         List<Person> lastShownList = model.getFilteredPersonList();
 
         if (index.getZeroBased() >= lastShownList.size()) {
@@ -119,7 +140,8 @@ public class EditCommand extends Command {
             return false;
         }
 
-        return index.equals(otherEditCommand.index)
+        return Objects.equals(index, otherEditCommand.index)
+                && Objects.equals(targetId, otherEditCommand.targetId)
                 && editPersonDescriptor.equals(otherEditCommand.editPersonDescriptor);
     }
 
@@ -127,6 +149,7 @@ public class EditCommand extends Command {
     public String toString() {
         return new ToStringBuilder(this)
                 .add("index", index)
+                .add("targetId", targetId)
                 .add("editPersonDescriptor", editPersonDescriptor)
                 .toString();
     }

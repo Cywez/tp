@@ -24,6 +24,7 @@ import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_FRIEND;
 import static seedu.address.logic.commands.CommandTestUtil.VALID_TAG_HUSBAND;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_ID;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_TAG;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
@@ -41,6 +42,7 @@ import seedu.address.logic.commands.EditCommand.EditPersonDescriptor;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
+import seedu.address.model.person.PersonId;
 import seedu.address.model.person.Phone;
 import seedu.address.model.tag.Tag;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
@@ -53,6 +55,38 @@ public class EditCommandParserTest {
             String.format(MESSAGE_INVALID_COMMAND_FORMAT, EditCommand.MESSAGE_USAGE);
 
     private EditCommandParser parser = new EditCommandParser();
+
+    @Test
+    public void parse_validIdWithFields_success() {
+        EditPersonDescriptor descriptor = new EditPersonDescriptorBuilder().withPhone(VALID_PHONE_BOB).build();
+        assertParseSuccess(parser, " id/C1" + PHONE_DESC_BOB, new EditCommand(new PersonId("C1"), descriptor));
+
+        // ID given after the fields
+        assertParseSuccess(parser, PHONE_DESC_BOB + " id/C1", new EditCommand(new PersonId("C1"), descriptor));
+    }
+
+    @Test
+    public void parse_idWithoutFields_failure() {
+        assertParseFailure(parser, " id/C1", EditCommand.MESSAGE_NOT_EDITED);
+    }
+
+    @Test
+    public void parse_invalidId_failure() {
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, PersonId.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " id/hello" + PHONE_DESC_BOB, expectedMessage);
+        assertParseFailure(parser, " id/C0" + PHONE_DESC_BOB, expectedMessage);
+    }
+
+    @Test
+    public void parse_indexAndId_failure() {
+        assertParseFailure(parser, "1 id/C1" + PHONE_DESC_BOB, MESSAGE_INVALID_FORMAT);
+    }
+
+    @Test
+    public void parse_duplicateId_failure() {
+        assertParseFailure(parser, " id/C1 id/C2" + PHONE_DESC_BOB,
+                Messages.getErrorMessageForDuplicatePrefixes(PREFIX_ID));
+    }
 
     @Test
     public void parse_missingParts_failure() {

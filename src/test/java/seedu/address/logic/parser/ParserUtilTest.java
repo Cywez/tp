@@ -15,6 +15,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
+import seedu.address.model.person.PersonId;
 import seedu.address.model.person.Phone;
 import seedu.address.model.tag.Tag;
 
@@ -52,6 +53,27 @@ public class ParserUtilTest {
 
         // Leading and trailing whitespaces
         assertEquals(INDEX_FIRST_PERSON, ParserUtil.parseIndex("  1  "));
+    }
+
+    @Test
+    public void parsePersonId_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> ParserUtil.parsePersonId(null));
+    }
+
+    @Test
+    public void parsePersonId_invalidValue_throwsParseException() {
+        assertThrows(ParseException.class, PersonId.MESSAGE_CONSTRAINTS, () -> ParserUtil.parsePersonId("hello"));
+        assertThrows(ParseException.class, PersonId.MESSAGE_CONSTRAINTS, () -> ParserUtil.parsePersonId("c42"));
+    }
+
+    @Test
+    public void parsePersonId_validValueWithoutWhitespace_returnsPersonId() throws Exception {
+        assertEquals(new PersonId("C42"), ParserUtil.parsePersonId("C42"));
+    }
+
+    @Test
+    public void parsePersonId_validValueWithWhitespace_returnsTrimmedPersonId() throws Exception {
+        assertEquals(new PersonId("C42"), ParserUtil.parsePersonId(WHITESPACE + "C42" + WHITESPACE));
     }
 
     @Test

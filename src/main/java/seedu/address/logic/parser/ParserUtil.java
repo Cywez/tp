@@ -1,9 +1,12 @@
 package seedu.address.logic.parser;
 
 import static java.util.Objects.requireNonNull;
+import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_ID;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import seedu.address.commons.core.index.Index;
@@ -12,6 +15,7 @@ import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Address;
 import seedu.address.model.person.Email;
 import seedu.address.model.person.Name;
+import seedu.address.model.person.PersonId;
 import seedu.address.model.person.Phone;
 import seedu.address.model.tag.Tag;
 
@@ -33,6 +37,48 @@ public class ParserUtil {
             throw new ParseException(MESSAGE_INVALID_INDEX);
         }
         return Index.fromOneBased(Integer.parseInt(trimmedIndex));
+    }
+
+    /**
+     * Parses a {@code String personId} into a {@code PersonId}.
+     * Leading and trailing whitespaces will be trimmed.
+     *
+     * @throws ParseException if the given {@code personId} is invalid.
+     */
+    public static PersonId parsePersonId(String personId) throws ParseException {
+        requireNonNull(personId);
+        String trimmedPersonId = personId.trim();
+        if (!PersonId.isValidPersonId(trimmedPersonId)) {
+            throw new ParseException(PersonId.MESSAGE_CONSTRAINTS);
+        }
+        return new PersonId(trimmedPersonId);
+    }
+
+    /**
+     * Parses the contact ID given with {@code PREFIX_ID} in {@code argMultimap}, which selects the contact
+     * a command acts on. Returns {@code Optional.empty()} if no ID is given.
+     *
+     * @param messageUsage the usage message of the command, shown if the input is not in the expected format.
+     * @throws ParseException if the ID is given together with a preamble (such as an index), given more than
+     *     once, or is invalid.
+     */
+    public static Optional<PersonId> parseTargetPersonId(ArgumentMultimap argMultimap, String messageUsage)
+            throws ParseException {
+        requireNonNull(argMultimap);
+        if (argMultimap.getValue(PREFIX_ID).isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (!argMultimap.getPreamble().isEmpty()) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, messageUsage));
+        }
+        argMultimap.verifyNoDuplicatePrefixesFor(PREFIX_ID);
+
+        try {
+            return Optional.of(parsePersonId(argMultimap.getValue(PREFIX_ID).get()));
+        } catch (ParseException pe) {
+            throw new ParseException(String.format(MESSAGE_INVALID_COMMAND_FORMAT, pe.getMessage()), pe);
+        }
     }
 
     /**

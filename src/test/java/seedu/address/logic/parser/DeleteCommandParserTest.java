@@ -1,13 +1,16 @@
 package seedu.address.logic.parser;
 
 import static seedu.address.logic.Messages.MESSAGE_INVALID_COMMAND_FORMAT;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_ID;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseFailure;
 import static seedu.address.logic.parser.CommandParserTestUtil.assertParseSuccess;
 import static seedu.address.testutil.TypicalIndexes.INDEX_FIRST_PERSON;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.address.logic.Messages;
 import seedu.address.logic.commands.DeleteCommand;
+import seedu.address.model.person.PersonId;
 
 /**
  * As we are only doing white-box testing, our test cases do not cover path variations
@@ -28,5 +31,32 @@ public class DeleteCommandParserTest {
     @Test
     public void parse_invalidArgs_throwsParseException() {
         assertParseFailure(parser, "a", String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_validId_returnsDeleteCommand() {
+        assertParseSuccess(parser, " id/C42", new DeleteCommand(new PersonId("C42")));
+
+        // whitespace around the ID
+        assertParseSuccess(parser, "  id/  C42  ", new DeleteCommand(new PersonId("C42")));
+    }
+
+    @Test
+    public void parse_invalidId_throwsParseException() {
+        String expectedMessage = String.format(MESSAGE_INVALID_COMMAND_FORMAT, PersonId.MESSAGE_CONSTRAINTS);
+        assertParseFailure(parser, " id/hello", expectedMessage);
+        assertParseFailure(parser, " id/c42", expectedMessage); // lowercase prefix
+        assertParseFailure(parser, " id/", expectedMessage); // missing ID
+    }
+
+    @Test
+    public void parse_indexAndId_throwsParseException() {
+        assertParseFailure(parser, "1 id/C42",
+                String.format(MESSAGE_INVALID_COMMAND_FORMAT, DeleteCommand.MESSAGE_USAGE));
+    }
+
+    @Test
+    public void parse_duplicateId_throwsParseException() {
+        assertParseFailure(parser, " id/C1 id/C2", Messages.getErrorMessageForDuplicatePrefixes(PREFIX_ID));
     }
 }

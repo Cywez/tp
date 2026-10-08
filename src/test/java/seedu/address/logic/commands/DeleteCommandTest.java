@@ -18,6 +18,7 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.PersonId;
 
 /**
  * Contains integration tests (interaction with the Model) and unit tests for
@@ -99,14 +100,38 @@ public class DeleteCommandTest {
 
         // different person -> returns false
         assertFalse(deleteFirstCommand.equals(deleteSecondCommand));
+
+        // same ID -> returns true
+        DeleteCommand deleteByIdCommand = new DeleteCommand(new PersonId("C1"));
+        assertTrue(deleteByIdCommand.equals(new DeleteCommand(new PersonId("C1"))));
+
+        // different ID -> returns false
+        assertFalse(deleteByIdCommand.equals(new DeleteCommand(new PersonId("C2"))));
+
+        // selected by ID instead of index -> returns false
+        assertFalse(deleteFirstCommand.equals(deleteByIdCommand));
+    }
+
+    @Test
+    public void execute_targetById_throwsCommandException() {
+        // selecting by ID is not connected yet, so nothing is deleted
+        DeleteCommand deleteCommand = new DeleteCommand(new PersonId("C1"));
+        assertCommandFailure(deleteCommand, model, Messages.MESSAGE_ID_TARGETING_NOT_SUPPORTED);
     }
 
     @Test
     public void toStringMethod() {
         Index targetIndex = Index.fromOneBased(1);
         DeleteCommand deleteCommand = new DeleteCommand(targetIndex);
-        String expected = DeleteCommand.class.getCanonicalName() + "{targetIndex=" + targetIndex + "}";
+        String expected = DeleteCommand.class.getCanonicalName() + "{targetIndex=" + targetIndex
+                + ", targetId=null}";
         assertEquals(expected, deleteCommand.toString());
+
+        PersonId targetId = new PersonId("C1");
+        DeleteCommand deleteByIdCommand = new DeleteCommand(targetId);
+        String expectedById = DeleteCommand.class.getCanonicalName() + "{targetIndex=null, targetId=" + targetId
+                + "}";
+        assertEquals(expectedById, deleteByIdCommand.toString());
     }
 
     /**

@@ -25,6 +25,7 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.PersonId;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
 
@@ -182,6 +183,23 @@ public class EditCommandTest {
 
         // different descriptor -> returns false
         assertFalse(standardCommand.equals(new EditCommand(INDEX_FIRST_PERSON, DESC_BOB)));
+
+        // same ID -> returns true
+        EditCommand editByIdCommand = new EditCommand(new PersonId("C1"), DESC_AMY);
+        assertTrue(editByIdCommand.equals(new EditCommand(new PersonId("C1"), copyDescriptor)));
+
+        // different ID -> returns false
+        assertFalse(editByIdCommand.equals(new EditCommand(new PersonId("C2"), DESC_AMY)));
+
+        // selected by ID instead of index -> returns false
+        assertFalse(standardCommand.equals(editByIdCommand));
+    }
+
+    @Test
+    public void execute_targetById_failure() {
+        // selecting by ID is not connected yet, so nothing is edited
+        EditCommand editCommand = new EditCommand(new PersonId("C1"), DESC_BOB);
+        assertCommandFailure(editCommand, model, Messages.MESSAGE_ID_TARGETING_NOT_SUPPORTED);
     }
 
     @Test
@@ -189,9 +207,15 @@ public class EditCommandTest {
         Index index = Index.fromOneBased(1);
         EditPersonDescriptor editPersonDescriptor = new EditPersonDescriptor();
         EditCommand editCommand = new EditCommand(index, editPersonDescriptor);
-        String expected = EditCommand.class.getCanonicalName() + "{index=" + index + ", editPersonDescriptor="
-                + editPersonDescriptor + "}";
+        String expected = EditCommand.class.getCanonicalName() + "{index=" + index + ", targetId=null"
+                + ", editPersonDescriptor=" + editPersonDescriptor + "}";
         assertEquals(expected, editCommand.toString());
+
+        PersonId targetId = new PersonId("C1");
+        EditCommand editByIdCommand = new EditCommand(targetId, editPersonDescriptor);
+        String expectedById = EditCommand.class.getCanonicalName() + "{index=null, targetId=" + targetId
+                + ", editPersonDescriptor=" + editPersonDescriptor + "}";
+        assertEquals(expectedById, editByIdCommand.toString());
     }
 
 }
