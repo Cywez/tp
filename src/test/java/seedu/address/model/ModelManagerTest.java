@@ -8,9 +8,11 @@ import static seedu.address.testutil.Assert.assertThrows;
 import static seedu.address.testutil.TypicalPersons.ALICE;
 import static seedu.address.testutil.TypicalPersons.BENSON;
 import static seedu.address.testutil.TypicalPersons.CARL;
+import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -81,6 +83,26 @@ public class ModelManagerTest {
         Person addedPerson = modelManager.addPerson(new PersonBuilder().build());
         assertEquals(new PersonId("C1"), addedPerson.getId().get());
         assertEquals(List.of(addedPerson), modelManager.getFilteredPersonList());
+    }
+
+    @Test
+    public void findPersonById_personHiddenByFilter_returnsPerson() {
+        ModelManager typicalModelManager = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+        typicalModelManager.updateFilteredPersonList(person -> person.isSamePerson(ALICE)); // only ALICE shown
+
+        // BENSON is not displayed, but is still found
+        assertEquals(Optional.of(BENSON), typicalModelManager.findPersonById(new PersonId("C2")));
+    }
+
+    @Test
+    public void findPersonById_unknownId_returnsEmpty() {
+        ModelManager typicalModelManager = new ModelManager(getTypicalAddressBook(), new UserPrefs());
+        assertEquals(Optional.empty(), typicalModelManager.findPersonById(new PersonId("C99")));
+    }
+
+    @Test
+    public void findPersonById_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> modelManager.findPersonById(null));
     }
 
     @Test

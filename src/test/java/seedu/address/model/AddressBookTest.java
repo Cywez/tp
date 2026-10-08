@@ -16,6 +16,7 @@ import static seedu.address.testutil.TypicalPersons.getTypicalAddressBook;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -153,6 +154,23 @@ public class AddressBookTest {
         Person aliceWithDifferentId = new PersonBuilder(ALICE).withId("C99").build();
         assertThrows(IllegalArgumentException.class, AddressBook.MESSAGE_PERSON_ID_CHANGED, () ->
                 addressBook.setPerson(ALICE, aliceWithDifferentId));
+    }
+
+    @Test
+    public void findPersonById_existingId_returnsPerson() {
+        AddressBook typicalAddressBook = getTypicalAddressBook();
+        assertEquals(Optional.of(GEORGE), typicalAddressBook.findPersonById(new PersonId("C7")));
+    }
+
+    @Test
+    public void findPersonById_unknownId_returnsEmpty() {
+        AddressBook typicalAddressBook = getTypicalAddressBook(); // C1 to C7
+        assertEquals(Optional.empty(), typicalAddressBook.findPersonById(new PersonId("C8")));
+    }
+
+    @Test
+    public void findPersonById_null_throwsNullPointerException() {
+        assertThrows(NullPointerException.class, () -> addressBook.findPersonById(null));
     }
 
     @Test

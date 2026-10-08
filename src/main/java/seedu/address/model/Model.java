@@ -1,11 +1,13 @@
 package seedu.address.model;
 
 import java.util.Comparator;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import javafx.collections.ObservableList;
 import seedu.address.commons.core.GuiSettings;
 import seedu.address.model.person.Person;
+import seedu.address.model.person.PersonId;
 
 /**
  * The API of the Model component.
@@ -41,6 +43,12 @@ public interface Model {
      * Returns true if a person with the same identity as {@code person} exists in the address book.
      */
     boolean hasPerson(Person person);
+
+    /**
+     * Returns the person with the ID {@code id}, or {@code Optional.empty()} if no person has that ID.
+     * The whole address book is searched, including persons hidden from the filtered person list.
+     */
+    Optional<Person> findPersonById(PersonId id);
 
     /**
      * Deletes the given person.
